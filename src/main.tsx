@@ -1,16 +1,14 @@
 import { StrictMode } from 'react'
 import ReactDOM from 'react-dom'
 
-import { ChosenThemeProvider, ThemeProvider } from '@/providers'
-import App from './App'
+import RoutesManager from './components/RoutesManager'
+import { AuthContextProvider } from './contexts/auth-context'
 
 ReactDOM.render(
   <StrictMode>
-    <ChosenThemeProvider>
-      <ThemeProvider>
-        <App />
-      </ThemeProvider>
-    </ChosenThemeProvider>
+    <AuthContextProvider>
+      <RoutesManager />
+    </AuthContextProvider>
   </StrictMode>,
   document.getElementById('root')
 )

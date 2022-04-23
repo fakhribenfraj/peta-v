@@ -1,0 +1,90 @@
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+body {
+  box-sizing: border-box;
+} */
+*,
+*::after,
+*::before {
+  margin: 0;
+  padding: 0;
+  box-sizing: inherit;
+}
+
+html {
+  /* This defines what 1rem is */
+  font-size: 62.5%; /*1 rem = 10px; 10px/16px = 62.5%*/
+}
+/* tablet-landscape: width < 1200?*/
+@media only screen and (max-width: 75em) {
+  html {
+    font-size: 56.25%; /*1 rem = 9px, 9/16 = 50%*/
+  }
+}
+
+/* tablet-portrait: width < 900?*/
+@media only screen and (max-width: 56.25em) {
+  html {
+    font-size: 50%; /*1 rem = 8px, 8/16 = 50%*/
+  }
+}
+
+/* big-desktop: width > 1800?*/
+@media only screen and (min-width: 112.5em) {
+  html {
+    font-size: 75%; /*1rem = 12, 12/16*/
+  }
+}
+body {
+  box-sizing: border-box;
+  overscroll-behavior: contain;
+  height: 100vh;
+  overflow: hidden;
+}
+a {
+  text-decoration: none;
+}
+
+.react-swipeable-view-container,
+#root {
+  height: 100%;
+}
+#root {
+  padding-top: 3.7rem;
+}
+
+/* tablet-portrait: width < 900?*/
+
+@media only screen and (max-width: 75em) {
+  #root {
+    padding-top: 8rem;
+  }
+}
+
+@media only screen and (max-width: 56.25em) {
+  #root {
+    padding-top: 8rem;
+  }
+}
+@media only screen and (max-width: 48em) {
+  #root {
+    padding-top: 7rem;
+  }
+}
+@media only screen and (min-width: 75em) {
+  #root {
+    padding-top: 8rem;
+  }
+}
+
+.react-html5-camera-photo,
+.react-html5-camera-photo > video,
+.react-html5-camera-photo > img {
+  height: 100% !important;
+  width: 100% !important;
+  object-fit: cover !important;
+  overflow: hidden;
+}

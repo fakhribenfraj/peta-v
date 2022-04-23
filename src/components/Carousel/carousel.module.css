@@ -1,0 +1,4 @@
+.slide_dark {
+  filter: saturate(25%) brightness(0.25);
+  width: 35%;
+}

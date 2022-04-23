@@ -1,37 +1,27 @@
-import { FC } from 'react'
-import { Link, Slider, styled } from '@mui/material'
+import { FC } from "react";
+import { Grid, Link, Slider, styled } from "@mui/material";
 
-import Header from '@/header'
+import Header from "@/components/Header";
+import { Outlet } from "react-router-dom";
 
 const App: FC = () => {
   return (
-    <Root>
+    <>
       <Header />
-      <div>
-        <h2>
-          How much do you like{' '}
-          <Link href='https://vitejs.dev/' target='_blank' rel='noopener noreferrer'>
-            Vite?
-          </Link>
-        </h2>
-        <Slider />
-      </div>
-    </Root>
-  )
-}
+      <Outlet />
+      {/* <Grid
+        container
+        alignContent="flex-start"
+        sx={{
+          pt: { xs: "6.5rem", lg: "6.7rem", xl: "7.5rem" },
+          height: "100vh",
+          overflowY: "hidden",
+        }}
+      >
+        <Outlet />
+      </Grid> */}
+    </>
+  );
+};
 
-const Root = styled('div')`
-  padding: 1% 2% 10vh 2%;
-  width: 100%;
-  min-height: 95vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  & a {
-    text-decoration: none;
-    color: ${({ theme: { palette } }) => palette.primary.main};
-  }
-`
-
-export default App
+export default App;
