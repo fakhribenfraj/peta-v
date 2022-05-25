@@ -1,6 +1,7 @@
 import {
   BottomNavigation,
   BottomNavigationAction,
+  Box,
   Button,
   Card,
   CardActions,
@@ -8,6 +9,7 @@ import {
   CardHeader,
   CardMedia,
   Checkbox,
+  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -17,18 +19,24 @@ import {
   Paper,
   Select,
   SelectChangeEvent,
+  Tooltip,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import RestoreIcon from "@mui/icons-material/Restore";
+import EditIcon from "@mui/icons-material/Edit";
+import AddPetIcon from "@/assets/addPet.svg";
 import FavoriteIcon from "@mui/icons-material/Favorite";
 import ArchiveIcon from "@mui/icons-material/Archive";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { animals, SpecsFilter } from "@/resources/animals";
 import SearchBar from "@/components/SearchBar";
 import { borderColor } from "@mui/system";
+import Icon from "@/components/Icon";
+import PetsIcon from "@mui/icons-material/Pets";
+import AuthContext from "@/contexts/auth-context";
+import { getMyPets } from "@/api/animalAPI";
 const Mypets: React.FC = (props) => {
   const filters: { label: string; options: string[] }[] = [
     {
@@ -45,14 +53,19 @@ const Mypets: React.FC = (props) => {
   const theme = useTheme();
   const underMd = useMediaQuery(theme.breakpoints.down("md"));
   const [sortValue, setSortValue] = useState("");
+  const authCtx = useContext(AuthContext);
   const [value, setValue] = useState("");
+  const [animals, setAnimals] = useState<any[]>([]);
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [specs, setSpecs] = useState<SpecsFilter>({
     species: [],
     age: [],
     size: [],
     gender: [],
   });
-  const animalList = animals.filter(
+  const animalList = animals?.filter(
     (animal) =>
       (specs.species.length === 0 ||
         specs.species.includes(animal.specs.species)) &&
@@ -61,7 +74,7 @@ const Mypets: React.FC = (props) => {
       (specs.gender.length === 0 || specs.gender.includes(animal.specs.gender))
   );
   sortValue == "1" &&
-    animalList.sort(function (a, b) {
+    animalList?.sort(function (a, b) {
       if (a.name < b.name) {
         return -1;
       }
@@ -71,7 +84,7 @@ const Mypets: React.FC = (props) => {
       return 0;
     });
   sortValue == "2" &&
-    animalList.sort(function (a, b) {
+    animalList?.sort(function (a, b) {
       if (a.name < b.name) {
         return 1;
       }
@@ -93,13 +106,34 @@ const Mypets: React.FC = (props) => {
   const handleSort = (event: SelectChangeEvent) => {
     setSortValue(event.target.value as string);
   };
+
+  useEffect(() => {
+    setIsLoading(true);
+    getMyPets(authCtx.token!)
+      .then((res) => {
+        setIsLoading(false);
+
+        if (res?.ok) {
+          return res.json();
+        } else {
+          return res?.json().then((data: any) => {
+            let errorMessage = "adding failed!";
+            // if (data && data.error && data.error.message) {
+            //   errorMessage = data.error.message;
+            // }
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => setAnimals(data?.pets))
+      .catch((e: Error) => {});
+  }, []);
   return (
     <Grid
       container
       sx={{
         height: "100%",
         overflowY: "hidden",
-        pb: "6rem",
       }}
     >
       <Grid
@@ -209,95 +243,50 @@ const Mypets: React.FC = (props) => {
             </FormControl>
           </Grid>
         </Grid>
-        {animalList.map((animal) => (
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-            sx={{ padding: " 2rem 1rem" }}
-            component={Link}
-            to={`/pet/${animal.name}`}
-          >
+        {isLoading && (
+          <Grid item container xs={12} justifyContent="center">
+            <CircularProgress color="primary" />
+          </Grid>
+        )}
+        {animalList?.map((animal) => (
+          <Grid item xs={12} sm={6} md={4} sx={{ padding: " 2rem 1rem" }}>
             <Card sx={{ maxWidth: "100%" }}>
-              <CardMedia
-                component="img"
-                height="194"
-                image={animal.imgs[0].src}
-                alt={animal.imgs[0].alt}
-              />
-              <CardContent>
-                <Typography variant="h5" color="primary.dark">
-                  {animal.name}
-                </Typography>
-                <Typography variant="body1" color="text.secondary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam
-                  cum nihil deserunt
-                </Typography>
-              </CardContent>
+              <CardActions sx={{ justifyContent: "flex-end" }}>
+                {/* <IconButton color="primary">
+                    <EditIcon />
+                  </IconButton> */}
+                <Tooltip title="put fo adoption">
+                  {animal.status == 0 ? (
+                    <IconButton color="primary">
+                      <PetsIcon />
+                    </IconButton>
+                  ) : (
+                    <p>pending...</p>
+                  )}
+                </Tooltip>
+              </CardActions>
+              <Box component={Link} to={`/pet/${animal.id}`}>
+                <CardMedia
+                  component="img"
+                  height="194"
+                  // image={animal.imgs[0].src}
+                  // alt={animal.imgs[0].alt}
+                />
+                <CardContent>
+                  <Typography variant="h5" color="primary.dark">
+                    {animal.name}
+                  </Typography>
+                  <Typography variant="body1" color="text.secondary">
+                    {animal.desc}
+                  </Typography>
+                </CardContent>
+              </Box>
             </Card>
           </Grid>
         ))}
       </Grid>
-      <Paper
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: { xs: 0, md: "25%" },
-          width: { xs: "100%", md: "50%" },
-          borderRadius: { xs: "none", md: "1rem 1rem 0 0" },
-          overflow: "hidden",
-          borderTop: "solid .3rem",
-          borderColor: "primary.dark",
-          height: "6rem",
-        }}
-        elevation={5}
-      >
-        <BottomNavigation
-          showLabels
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue);
-          }}
-        >
-          <BottomNavigationAction
-            component={Link}
-            to="/pet/addPet"
-            label="add pet"
-            icon={<RestoreIcon />}
-          />
-          <BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />
-        </BottomNavigation>
-      </Paper>
     </Grid>
   );
 };
 
 export default Mypets;
-
-{
-  /* <Paper
-        sx={{
-          position: "fixed",
-          bottom: 0,
-          left: "25%",
-          width: "50%",
-          borderRadius: "1rem 1rem 0 0",
-          overflow: "hidden",
-        }}
-        elevation={5}
-      >
-        <BottomNavigation
-          showLabels
-          value={value}
-          onChange={(event, newValue) => {
-            setValue(newValue);
-          }}
-          sx={{ bgcolor: "secondary.main" }}
-        >
-          <BottomNavigationAction label="Recents" icon={<RestoreIcon />} />
-          <BottomNavigationAction label="Favorites" icon={<FavoriteIcon />} />
-          <BottomNavigationAction label="Nearby" icon={<LocationOnIcon />} />
-        </BottomNavigation>
-      </Paper> */
-}

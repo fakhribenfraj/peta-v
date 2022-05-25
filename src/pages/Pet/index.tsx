@@ -1,6 +1,7 @@
 import Carousel from "@/components/Carousel";
 import {
   Button,
+  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -10,15 +11,17 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { animals } from "@/resources/animals";
+import { getPetById } from "@/api/animalAPI";
 const Pet: React.FC = (props) => {
   let { petId } = useParams();
-  const animal = animals.find((animal) => animal.id == +petId!);
-  if (!animal) {
-    return <div>animal not found</div>;
-  }
+  const [animal, setAnimal] = useState<any>();
+  const [isLoading, setIsLoading] = useState(false);
+
+  // const animal = animals.find((animal) => animal.id == +petId!);
+
   const [open, setOpen] = useState(false);
 
   const handleClickOpen = () => {
@@ -32,6 +35,43 @@ const Pet: React.FC = (props) => {
       setOpen(false);
     }
   };
+
+  useEffect(() => {
+    setIsLoading(true);
+    getPetById(parseInt(petId!))
+      .then((res) => {
+        setIsLoading(false);
+
+        if (res?.ok) {
+          return res.json();
+        } else {
+          return res?.json().then((data: any) => {
+            let errorMessage = "adding failed!";
+            // if (data && data.error && data.error.message) {
+            //   errorMessage = data.error.message;
+            // }
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => setAnimal(data?.pets))
+      .catch((e: Error) => {
+        setAnimal(null);
+      });
+  }, []);
+  if (!animal) {
+    return (
+      <>
+        {isLoading ? (
+          <Grid item container xs={12} justifyContent="center">
+            <CircularProgress color="primary" />
+          </Grid>
+        ) : (
+          <h1>animal not found</h1>
+        )}
+      </>
+    );
+  }
   return (
     <Grid
       container
@@ -43,7 +83,7 @@ const Pet: React.FC = (props) => {
         px: { md: "2rem" },
       }}
     >
-      <Carousel images={animal.imgs} />
+      {/* <Carousel images={animal?.imgs} /> */}
       <Grid item xs={12} sm={8} sx={{ p: "1rem" }}>
         <Grid
           container
@@ -52,11 +92,11 @@ const Pet: React.FC = (props) => {
           sx={{ p: "3rem" }}
         >
           <Grid item>
-            <Typography variant="h2">{animal.name}</Typography>
+            <Typography variant="h2">{animal?.name}</Typography>
             <Typography variant="h6">location</Typography> <Divider />
           </Grid>
           <Grid item>
-            <Typography variant="body1">{animal.specs.species}</Typography>
+            <Typography variant="body1">{animal?.specs?.species}</Typography>
             <Divider />
           </Grid>
           <Grid item>
@@ -65,7 +105,8 @@ const Pet: React.FC = (props) => {
             </Typography>
             <Typography variant="h6">Charasteristics</Typography>
             <Typography variant="body1" gutterBottom>
-              {animal.specs.age}, {animal.specs.gender}, {animal.specs.size},
+              {animal?.specs?.age}, {animal?.specs?.gender},{" "}
+              {animal?.specs?.size},
             </Typography>
             <Typography variant="h6">Health</Typography>
             <Typography variant="body1">
@@ -73,12 +114,9 @@ const Pet: React.FC = (props) => {
             </Typography>
           </Grid>
           <Grid item>
-            <Typography variant="h6">Meet {animal.name}</Typography>
+            <Typography variant="h6">Meet {animal?.name}</Typography>
             <Typography variant="body1" gutterBottom>
-              Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quaerat
-              impedit natus earum eligendi iusto quibusdam et soluta ea,
-              quisquam ipsam! Praesentium fuga error eos atque excepturi fugiat
-              a, quod aspernatur.
+              {animal?.desc}
             </Typography>
           </Grid>
         </Grid>

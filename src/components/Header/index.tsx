@@ -6,6 +6,8 @@ import {
   Button,
   Grid,
   IconButton,
+  Menu,
+  MenuItem,
   Tab,
   Tabs,
   Toolbar,
@@ -16,19 +18,24 @@ import SearchBar from "../SearchBar";
 import { Link, useLocation } from "react-router-dom";
 import AuthContext from "@/contexts/auth-context";
 import HomeIcon from "@/assets/home.svg";
+import AddPetIcon from "@/assets/addPet.svg";
+
 import AnalyseIcon from "@/assets/analyse.svg";
 import AdoptIcon from "@/assets/adopt.svg";
 import BellIcon from "@/assets/bell.svg";
 import LogoIcon from "@/assets/logo.svg";
+import Icons from "@/assets/sprite.svg";
+
 import PetHouseIcon from "@/assets/petHouse.svg";
 import PillIcon from "@/assets/pill.svg";
 import UserAvatar from "../UserAvatar";
+import Icon from "../Icon";
 
 const Header: FC = () => {
   const { isLoggedIn } = useContext(AuthContext);
   const links = [
-    { icon: HomeIcon, href: "" },
     { icon: AdoptIcon, href: "myPets" },
+    { icon: AddPetIcon, href: "pet/addPet" },
     { icon: PillIcon, href: "doctor" },
     { icon: BellIcon, href: "notifications" },
   ];
@@ -45,25 +52,25 @@ const Header: FC = () => {
   console.log("isLoggied in", isLoggedIn);
 
   useEffect(() => {
-    let currentPageIndex = 0;
+    let currentPageIndex = -1;
     switch (currentPath) {
-      case "/":
+      case "/myPets":
         currentPageIndex = 0;
         break;
-      case "/user/myPets":
+      case "/pet/addPet":
         currentPageIndex = 1;
         break;
-      case "/user/doctor":
+      case "/doctor":
         currentPageIndex = 2;
         break;
-      case "/user/notifications":
+      case "/notifications":
         currentPageIndex = 3;
         break;
       default:
         break;
     }
     setValue(currentPageIndex);
-  }, []);
+  }, [currentPath]);
   return (
     <AppBar position="fixed" sx={{ bgcolor: "common.white" }}>
       <Grid
@@ -74,34 +81,19 @@ const Header: FC = () => {
       >
         <Grid
           item
-          sx={{ display: { xs: "none", md: "flex" } }}
+          component={Link}
+          to="/"
+          sx={{ display: "block", minWidth: "7rem", maxWidth: "9rem" }}
           xs={1}
-          container
         >
-          <Grid
-            item
-            component={Link}
-            to="/"
-            sx={{ display: "block", minWidth: "7rem", maxWidth: "9rem" }}
-            xs={12}
-          >
-            <Box component="img" src={LogoIcon} sx={{ width: "100%" }} />
-          </Grid>
-          {/* <Grid item xs={avatarVisibility ? 8 : 9}>
-            <SearchBar />
-          </Grid> */}
-          {/* {avatarVisibility && (
-            <Grid item xs={1}>
-              <UserAvatar />
-            </Grid>
-          )} */}
+          <Box component="img" src={LogoIcon} sx={{ width: "100%" }} />
         </Grid>
         {isLoggedIn && (
           <Grid
             item
             // md={7}
-            xs={isLoggedIn ? 11 : 9}
-            md={isLoggedIn ? 10 : 8}
+            // xs={isLoggedIn ? 11 : 9}
+            xs={8}
             container
             justifyContent="space-between"
             sx={{ px: "2rem" }}
@@ -116,22 +108,10 @@ const Header: FC = () => {
               {links.map((item) => (
                 <Tab
                   key={item.href}
-                  icon={
-                    <Box
-                      component="img"
-                      src={item.icon}
-                      sx={{
-                        width: { xs: "2.5rem", md: "4rem" },
-                      }}
-                    />
-                  }
+                  icon={<Icon src={item.icon} />}
                   aria-label={item.href}
                   component={Link}
-                  to={
-                    item.href.length == 0
-                      ? `/${item.href}`
-                      : `/user/${item.href}`
-                  }
+                  to={`/${item.href}`}
                   sx={{
                     minWidth: "0",
                     p: { xs: ".8rem 1rem", md: "1rem 1.2rem" },
@@ -157,7 +137,7 @@ const Header: FC = () => {
           ) : (
             <>
               {["login", "register"].map((item) => (
-                <Button component={Link} to={`/user/${item}`} color="primary">
+                <Button component={Link} to={`/${item}`} color="primary">
                   {item}
                 </Button>
               ))}

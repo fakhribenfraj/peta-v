@@ -88,3 +88,6 @@ a {
   object-fit: cover !important;
   overflow: hidden;
 }
+.hide {
+  display: none !important;
+}

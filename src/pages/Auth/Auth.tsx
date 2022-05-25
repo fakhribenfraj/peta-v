@@ -7,9 +7,11 @@ import React, {
 } from "react";
 
 import {
+  Backdrop,
   Box,
   Button,
   ButtonGroup,
+  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -43,24 +45,27 @@ const Auth = (props: any) => {
       setValue(1);
     }
   }, [props.register]);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+
   const emailInputRef = useRef<HTMLInputElement>(null);
   const passwordInputRef = useRef<HTMLInputElement>(null);
   let navigate = useNavigate();
 
   const authCtx = useContext(AuthContext);
-
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const enteredName = nameInputRef?.current?.value;
 
     const enteredEmail = emailInputRef?.current?.value;
     const enteredPassword = passwordInputRef?.current?.value;
 
     // optional: Add validation
     setIsLoading(true);
-    let navigationUrl = "/";
-    authenticate(enteredEmail, enteredPassword, !props.register)
+    let navigationUrl = "/myPets";
+    authenticate(enteredName, enteredEmail, enteredPassword, !props.register)
       .then((res) => {
         setIsLoading(false);
         if (res?.ok) {
@@ -77,10 +82,10 @@ const Auth = (props: any) => {
         }
       })
       .then((data) => {
-        const expirationTime = new Date(
-          new Date().getTime() + +data.expiresIn * 1000
-        );
-        authCtx.login(data.idToken, expirationTime.toISOString());
+        // const expirationTime = new Date(
+        //   new Date().getTime() + +data.expiresIn * 1000
+        // );
+        authCtx.login(data.token);
         navigate(navigationUrl);
       })
       .catch((err) => {
@@ -119,14 +124,16 @@ const Auth = (props: any) => {
                 sx={{ width: "100%" }}
               ></Box>
             </Box>
-            <Typography variant="h5" component='span'>peta V</Typography>
+            <Typography variant="h5" component="span">
+              peta V
+            </Typography>
           </Grid>
           <Grid item xs={12}>
             <Typography variant="h5" component="h1">
               {props.register ? "Register" : "Log in"}
             </Typography>
           </Grid>
-          <Grid item container xs={12}>
+          {/* <Grid item container xs={12}>
             <>
               {["google", "facebook", "apple"].map((option) => (
                 <Grid
@@ -140,7 +147,7 @@ const Auth = (props: any) => {
                 </Grid>
               ))}
             </>
-          </Grid>
+          </Grid> */}
           <Grid item xs={12}>
             <FormControl
               component="form"
@@ -161,6 +168,7 @@ const Auth = (props: any) => {
                       variant="outlined"
                       color="primary"
                       size="small"
+                      inputRef={nameInputRef}
                       InputLabelProps={{ sx: styles.input }}
                     />
                   </Grid>
@@ -237,6 +245,12 @@ const Auth = (props: any) => {
           )}
         </Grid>
       </Paper>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={isLoading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Box>
   );
 };

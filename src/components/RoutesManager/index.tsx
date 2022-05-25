@@ -22,33 +22,24 @@ const RoutesManager = () => {
           <Route path="/" element={<App />}>
             <Route path="" element={<Home />}></Route>
 
-            <Route path="user">
-              <Route path="" element={<Navigate to="/" />} />
-              {authCtx.isLoggedIn && (
-                <>
-                  <Route path="myPets" element={<MyPets />}></Route>
-                  <Route path="doctor" element={<Analyse />}></Route>
-                  <Route
-                    path="notifications"
-                    element={<Notifications />}
-                  ></Route>
-                </>
-              )}
+            {authCtx.isLoggedIn && (
+              <>
+                <Route path="myPets" element={<MyPets />}></Route>
+                <Route path="doctor" element={<Analyse />}></Route>
+                <Route path="notifications" element={<Notifications />}></Route>
+              </>
+            )}
 
-              {!authCtx.isLoggedIn && (
-                <>
-                  <Route path="register" element={<Auth register />}></Route>
-                  <Route path="login" element={<Auth />}></Route>
-                </>
-              )}
-            </Route>
-
+            {!authCtx.isLoggedIn && (
+              <>
+                <Route path="register" element={<Auth register />}></Route>
+                <Route path="login" element={<Auth />}></Route>
+              </>
+            )}
             <Route path="pet">
               <Route path="" element={<Navigate to="/" />} />
               <Route path=":petId" element={<Pet />}></Route>
-              {authCtx.isLoggedIn && (
-                <Route path="addPet" element={<AddPet />}></Route>
-              )}
+              <Route path="addPet" element={<AddPet />}></Route>
             </Route>
           </Route>
 

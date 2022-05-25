@@ -1,62 +1,49 @@
-export const authenticate = async (email?: string, password?: string, isLogin = true) => {
-  const url = isLogin ? `https://localhost:4001/login` : `https://localhost:4001/register`
+export const authenticate = async (
+  name?: string,
+  email?: string,
+  password?: string,
+  isLogin = true
+) => {
+  const url = `http://localhost:8000/api/${isLogin ? "login" : "register"}`;
   try {
+    const body = isLogin
+      ? {
+          email,
+          password,
+        }
+      : {
+          name,
+          email,
+          password,
+          password_confirmation: password,
+        };
     const data = await fetch(url, {
-      method: 'POST',
-      body: JSON.stringify({
-        email,
-        password,
-        returnSecureToken: true
-      }),
+      method: "POST",
+      body: JSON.stringify(body),
       headers: {
-        'Content-Type': 'application/json'
-      }
-    })
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
 
-    return data
+    return data;
   } catch (error) {
-    console.log(error)
+    console.log(error);
   }
-}
+};
+export const logout = async (token: string) => {
+  try {
+    const data = await fetch(`http://localhost:8000/api/logout`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
 
-// export const login = async (email: string, password: string) => {
-//   try {
-//     const {
-//       data: { data },
-//     } = await axios.get(
-//       `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${process.env.REACT_APP_FIREBASE_KEY}`,
-//       {
-//         params: {
-//           email,
-//           password,
-//           returnSecureToken: true,
-//         },
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-
-//     return data;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
-
-// export const signup = async (email: string, password: string) => {
-//   try {
-//     const { data } = await axios.get(
-//       `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${process.env.REACT_APP_FIREBASE_KEY}`,
-//       {
-//         params: { email, password, returnSecureToken: true },
-//         headers: {
-//           "Content-Type": "application/json",
-//         },
-//       }
-//     );
-
-//     return data;
-//   } catch (error) {
-//     console.log(error);
-//   }
-// };
+    return data;
+  } catch (error) {
+    console.log(error);
+  }
+};

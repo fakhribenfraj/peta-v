@@ -5,6 +5,7 @@ import {
   CardHeader,
   CardMedia,
   Checkbox,
+  CircularProgress,
   FormControl,
   Grid,
   IconButton,
@@ -21,27 +22,32 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import { Link } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { animals, SpecsFilter } from "@/resources/animals";
 import SearchBar from "@/components/SearchBar";
 import { homeFilters } from "@/resources/filters";
+import { getAllPets } from "@/api/animalAPI";
 const Home: React.FC = (props) => {
   const theme = useTheme();
   const underMd = useMediaQuery(theme.breakpoints.down("md"));
   const [sortValue, setSortValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+
   const [specs, setSpecs] = useState<SpecsFilter>({
     species: [],
     age: [],
     size: [],
     gender: [],
   });
+  const [animals, setAnimals] = useState<any[]>([]);
+
   const animalList = animals.filter(
     (animal) =>
       (specs.species.length === 0 ||
-        specs.species.includes(animal.specs.species)) &&
-      (specs.age.length === 0 || specs.age.includes(animal.specs.age)) &&
-      (specs.size.length === 0 || specs.size.includes(animal.specs.size)) &&
-      (specs.gender.length === 0 || specs.gender.includes(animal.specs.gender))
+        specs.species.includes(animal?.specs?.species)) &&
+      (specs.age.length === 0 || specs.age.includes(animal?.specs.age)) &&
+      (specs.size.length === 0 || specs.size.includes(animal?.specs.size)) &&
+      (specs.gender.length === 0 || specs.gender.includes(animal?.specs.gender))
   );
   sortValue == "1" &&
     animalList.sort(function (a, b) {
@@ -76,6 +82,27 @@ const Home: React.FC = (props) => {
   const handleSort = (event: SelectChangeEvent) => {
     setSortValue(event.target.value as string);
   };
+  useEffect(() => {
+    setIsLoading(true);
+    getAllPets()
+      .then((res) => {
+        setIsLoading(false);
+
+        if (res?.ok) {
+          return res.json();
+        } else {
+          return res?.json().then((data: any) => {
+            let errorMessage = "adding failed!";
+            // if (data && data.error && data.error.message) {
+            //   errorMessage = data.error.message;
+            // }
+            throw new Error(errorMessage);
+          });
+        }
+      })
+      .then((data) => setAnimals(data?.pets?.data))
+      .catch((e: Error) => {});
+  }, []);
   return (
     <Grid
       container
@@ -191,6 +218,12 @@ const Home: React.FC = (props) => {
             </FormControl>
           </Grid>
         </Grid>
+        {isLoading && (
+          <Grid item container xs={12} justifyContent="center">
+            <CircularProgress color="primary" />
+          </Grid>
+        )}
+
         {animalList.map((animal) => (
           <Grid
             item
@@ -199,22 +232,22 @@ const Home: React.FC = (props) => {
             md={4}
             sx={{ padding: " 2rem 1rem" }}
             component={Link}
-            to={`/pet/${animal.id}`}
+            to={`/pet/${animal?.id}`}
           >
             <Card sx={{ maxWidth: "100%" }}>
               <CardMedia
                 component="img"
                 height="194"
-                image={animal.imgs[0].src}
-                alt={animal.imgs[0].alt}
+                // image={animal?.imgs[0].src}
+                // alt={animal?.imgs[0].alt}
+                alt={animal?.name}
               />
               <CardContent>
                 <Typography variant="h5" color="primary.dark">
-                  {animal.name}
+                  {animal?.name}
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                  Lorem ipsum dolor sit amet consectetur adipisicing elit. Quam
-                  cum nihil deserunt
+                  {animal?.desc}
                 </Typography>
               </CardContent>
             </Card>
